@@ -1,0 +1,44 @@
+<div class="editor-row">
+    <div ng-repeat="sensor in ctrl.panel.sensors">
+        <div class="section gf-form-group">
+            <h5 class="section-heading">&nbsp</h5>
+            <span class="gf-form-label"><i class="fa fa-remove pointer" ng-click="ctrl.deleteSensor($index)"></i></span>
+        </div>
+        <div class="section gf-form-group">
+            <h5 class="section-heading">Metric</h5>
+            <div class="gf-form-inline">
+                <div class="gf-form">
+                    <input type="text" class="input-small gf-form-input max-width-40" ng-model="sensor.name" ng-change="ctrl.dataChanged()" ng-model-onblur/>
+                </div>
+            </div>
+        </div>
+        <div class="section gf-form-group">
+            <h5 class="section-heading">Location</h5>
+            <div class="gf-form-inline">
+                <div class="gf-form">
+                    <input type="text" class="input-small gf-form-input max-width-40" ng-model="sensor.location" ng-change="ctrl.dataChanged()" ng-model-onblur/>
+                </div>
+            </div>
+        </div>
+        <div class="section gf-form-group">
+            <h5 class="section-heading">Position</h5>
+            <div class="gf-form-inline">
+                <div class="gf-form">
+                    <label class="gf-form-label width-8">X axis</label>
+                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[0]" ng-change="ctrl.dataChanged()" />
+                </div>
+            </div>
+            <div class="gf-form-inline">
+                <div class="gf-form">
+                    <label class="gf-form-label width-8">Y axis</label>
+                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[1]" ng-change="ctrl.dataChanged()" />
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+<div class="editor-row">
+	<div class="gf-form-button">
+		<button class="btn btn-inverse" ng-click="ctrl.addSensor();ctrl.dataChanged()"><i class="fa fa-plus"></i>&nbsp;Add Sensor</button>
+	</div>
+</div>

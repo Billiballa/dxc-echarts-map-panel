@@ -1,0 +1,36 @@
+.echarts_card{
+    position: absolute; 
+    top: 50%;
+    right: 3%;
+    width: 20%;
+    min-width: 200px;
+    padding: 2%;
+    border-width: 0;
+    border-color: rgb(51, 51, 51);
+    border-radius: 14px;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    font-family: 'Microsoft YaHei';
+    line-height: 21px;
+    z-index: 9999999;
+    transform: translate(0,-50%);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    background-color: rgba(50, 50, 50, 0.701961);
+}
+.echarts_card .title{
+    font-size: 14px;
+    margin:0 0 20px 0;
+}
+.echarts_card .info{
+    text-align: center;
+    font-size: 16px;
+    margin:24px 0;
+}
+.echarts_card .info .name{
+    vertical-align: middle;
+}
+.echarts_card .info .value{
+    font-size: 28px;
+    font-weight: lighter;
+    vertical-align: middle;
+}

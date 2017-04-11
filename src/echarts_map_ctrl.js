@@ -13,7 +13,9 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         const panelDefaults = {
             EchartsOption: 'option = {}',
             valueMaps: [],
-            sensors: []
+            sensors: [],
+            url: '',
+            updateInterval: 3000
         };
 
         _.defaults(this.panel, panelDefaults);
@@ -23,10 +25,67 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         this.events.on('panel-initialized', this.render.bind(this));
         this.events.on('data-received', this.onDataReceived.bind(this));
         this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
+
+        this.updateClock();
     }
 
     onDataReceived(dataList) {
-        this.data = dataList;
+        // this.data = dataList;
+        // this.dataChanged();
+        // console.log(dataList);
+    }
+
+    //绕过grafana，自己post
+    updateClock() {
+        let that = this,
+            xmlhttp;
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        }
+        else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                if (!JSON.parse(xmlhttp.responseText).success) return;
+
+                that.data = JSON.parse(xmlhttp.responseText).data;
+                that.addSensor();
+            }
+        }
+
+        // xmlhttp.open("POST", "http://122.115.49.71/restful/dashboard/getBranchSum", true);
+        if (that.panel.url) {
+            xmlhttp.open("POST", that.panel.url, true);
+            xmlhttp.send("input=grafana");
+        }
+
+        // setTimeout(this.updateClock, JSON.stringify(that.panel.updateInterval));
+        this.$timeout(() => { this.updateClock(); }, that.panel.updateInterval);
+    }
+
+    addSensor() {
+        // if (this.panel.sensors.length < this.data.length) {
+        //     this.panel.sensors.push({ branchName: this.data[this.panel.sensors.length].branchName, status: this.data[this.panel.sensors.length].status, values: this.data[this.panel.sensors.length].values, alias: this.data[this.panel.sensors.length].branchName, location: '北京', coord: [116, 40] });
+        // } else {
+        //     let lastSensor = this.panel.sensors[this.panel.sensors.length - 1];
+        //     this.panel.sensors.push({ branchName: lastSensor.branchName || '', status: lastSensor.status || 0, values: lastSensor.values || [], alias: lastSensor.branchName, location: '北京', coord: [116, 40] });
+        // }
+        let oddSensors = this.panel.sensors.slice();//复制数组
+        console.log(oddSensors);
+        this.panel.sensors.length = 0;
+        for (let i = 0; i < this.data.length; i++) {
+            this.panel.sensors.push({ branchName: this.data[i].branchName, status: this.data[i].status, values: this.data[i].values, alias: this.data[i].branchName, location: '北京', coord: [116, 40] });
+            for (let j = 0; j < oddSensors.length; j++) {
+                if (this.data[i].branchName == oddSensors[j].branchName) {
+                    // this.panel.sensors.push({ branchName: this.data[i].branchName, status: this.data[i].status, values: this.data[i].values, alias: oddSensors[j].branchName, location: oddSensors[j].location, coord: oddSensors[j].coord });
+                    this.panel.sensors[i].alias = oddSensors[j].branchName;
+                    this.panel.sensors[i].location = oddSensors[j].location;
+                    this.panel.sensors[i].coord = oddSensors[j].coord;
+                }
+            }
+        }
         this.dataChanged();
     }
 
@@ -36,33 +95,22 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         this.IS_DATA_CHANGED = false;
     }
 
-    deleteSensor(index) {
-        this.panel.sensors.splice(index, 1);
-        this.dataChanged();
-    }
-
-    addSensor() {
-        if (this.panel.sensors.length < this.data.length)
-            this.panel.sensors.push({ name: this.data[this.panel.sensors.length].name, status: this.data[this.panel.sensors.length].status, value: this.data[this.panel.sensors.length].value, location: '北京', coord: [116, 40] });
-        else {
-            let lastSensor = this.panel.sensors[this.panel.sensors.length - 1];
-            this.panel.sensors.push({ name: lastSensor.name, status: lastSensor.status, value: lastSensor.value, location: '北京', xAxis: 116.4, yAxis: 40 });
-        }
-        this.dataChanged();
-    }
+    // deleteSensor(index) {
+    //     this.panel.sensors.splice(index, 1);
+    // }
 
     onInitEditMode() {
-        this.addEditorTab('Echarts options', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 2);
-        this.addEditorTab('Mark points', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 3);
+        this.addEditorTab('Data', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
+        this.addEditorTab('Echarts options', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
     }
 
     link(scope, elem, attrs, ctrl) {
         const $panelContainer = elem.find('.echarts_container')[0];
         const $panelCard = elem.find('.echarts_card')[0];
         let option = {},
-            echartsData = [],
-            echartsDataSum = NaN,
-            echartsLegend = [];
+            Timer,
+            currentLoc = 0,
+            echartsData = [];
 
         ctrl.IS_DATA_CHANGED = true;
 
@@ -81,14 +129,26 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         //init echarts
         let myChart = echarts.init($panelContainer, 'dark');
 
-        let Timer, currentLoc;
+        function render() {
+            if (!myChart || !ctrl.panel.sensors) {
+                return;
+            }
+            myChart.resize();
 
+            if (ctrl.IS_DATA_CHANGED) {
+                myChart.clear();
+                echartsData = ctrl.panel.sensors;
+            }
+            eval(ctrl.panel.EchartsOption);
+            myChart.setOption(option);
+
+            setTimer();
+        }
 
         //轮播计时器
         function setTimer() {
-            clearInterval(Timer);
-            currentLoc = 0;
-            Timer = setInterval(function () {
+            clearTimeout(Timer);
+            if (ctrl.panel.sensors.length > 0) {
                 myChart.setOption({
                     series: [{
                         data: [{
@@ -99,29 +159,14 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
                         animationEasingUpdate: 'cubicInOut'
                     }]
                 });
-                currentLoc = (currentLoc + 1) % ctrl.panel.sensors.length;
-
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
-                $panelCard.innerHTML = '<div class="title">' + ctrl.sensor.name + '</div>';
-                console.log(ctrl.sensor);
-                for (let j = 0; j < ctrl.sensor.value.length; j++) {
-                    $panelCard.innerHTML += '<div class="info">' + ' <span class="name">' + ctrl.sensor.value[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.value[j].value + '</span>' + '</div>';
+                $panelCard.innerHTML = '<div class="title">' + ctrl.sensor.branchName + '</div>';
+                for (let j = 0; j < ctrl.sensor.values.length; j++) {
+                    $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
                 }
-            }, 2000);
-        }
-
-        function render() {
-            if (!myChart || !ctrl.data) {
-                return;
+                currentLoc = (currentLoc + 1) % ctrl.panel.sensors.length;
+                Timer = setTimeout(setTimer, 3600);
             }
-            myChart.resize();
-
-            if (ctrl.IS_DATA_CHANGED) {
-                myChart.clear();
-            }
-            setTimer();
-            eval(ctrl.panel.EchartsOption);
-            myChart.setOption(option);
         }
 
         this.events.on('render', function () {

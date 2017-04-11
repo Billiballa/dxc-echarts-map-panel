@@ -80,7 +80,7 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
             for (let j = 0; j < oddSensors.length; j++) {
                 if (this.data[i].branchName == oddSensors[j].branchName) {
                     // this.panel.sensors.push({ branchName: this.data[i].branchName, status: this.data[i].status, values: this.data[i].values, alias: oddSensors[j].branchName, location: oddSensors[j].location, coord: oddSensors[j].coord });
-                    this.panel.sensors[i].alias = oddSensors[j].branchName;
+                    this.panel.sensors[i].alias = oddSensors[j].alias;
                     this.panel.sensors[i].location = oddSensors[j].location;
                     this.panel.sensors[i].coord = oddSensors[j].coord;
                 }
@@ -110,6 +110,7 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         let option = {},
             Timer,
             currentLoc = 0,
+            colorArr=['#3aae32','#fe8f02','#c23531'],
             echartsData = [];
 
         ctrl.IS_DATA_CHANGED = true;
@@ -160,7 +161,7 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
                     }]
                 });
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
-                $panelCard.innerHTML = '<div class="title">' + ctrl.sensor.branchName + '</div>';
+                $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:'+colorArr[ctrl.sensor.status%3]+';"></i>' + ctrl.sensor.alias + '</div>';
                 for (let j = 0; j < ctrl.sensor.values.length; j++) {
                     $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
                 }

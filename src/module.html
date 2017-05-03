@@ -1,4 +1,4 @@
-<div style="position: relative;overflow:hidden;">
-    <div class="echarts_container" style="height: {{ctrl.height}}px;"></div>
-    <div class = "echarts_card"></div>
+<div style="position: relative; overflow: hidden;">
+    <div class="echarts_container" ng-style="{height: ctrl.height}"></div>
+    <div class = "echarts_card" ng-if="ctrl.sensor"></div>
 </div>

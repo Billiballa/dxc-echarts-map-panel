@@ -1,11 +1,11 @@
+import {PanelCtrl} from 'app/plugins/sdk';
 import _ from 'lodash';
-import { MetricsPanelCtrl } from 'app/plugins/sdk';
 import echarts from 'vendor/echarts';
 import 'vendor/dark';
 import 'vendor/china';
 import './style.css!';
 
-export class EchartsMapCtrl extends MetricsPanelCtrl {
+export class EchartsMapCtrl extends PanelCtrl {
 
     constructor($scope, $injector) {
         super($scope, $injector);
@@ -23,19 +23,11 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
         this.events.on('panel-initialized', this.render.bind(this));
-        this.events.on('data-received', this.onDataReceived.bind(this));
-        this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
 
         this.updateClock();
     }
 
-    onDataReceived(dataList) {
-        // this.data = dataList;
-        // this.dataChanged();
-        // console.log(dataList);
-    }
-
-    //绕过grafana，自己post
+    //post请求
     updateClock() {
         let that = this,
             xmlhttp;
@@ -72,14 +64,15 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         //     let lastSensor = this.panel.sensors[this.panel.sensors.length - 1];
         //     this.panel.sensors.push({ branchName: lastSensor.branchName || '', status: lastSensor.status || 0, values: lastSensor.values || [], alias: lastSensor.branchName, location: '北京', coord: [116, 40] });
         // }
-        let oddSensors = this.panel.sensors.slice();//复制数组
-        console.log(oddSensors);
-        this.panel.sensors.length = 0;
+        let oddSensors = this.panel.sensors.slice(); // 保存原数据
+        this.panel.sensors.length = 0; // 清空现有数据
+
+        // 添加新数据，对比原数据，以保留坐标信息
         for (let i = 0; i < this.data.length; i++) {
             this.panel.sensors.push({ branchName: this.data[i].branchName, status: this.data[i].status, values: this.data[i].values, alias: this.data[i].branchName, location: '北京', coord: [116, 40] });
+
             for (let j = 0; j < oddSensors.length; j++) {
                 if (this.data[i].branchName == oddSensors[j].branchName) {
-                    // this.panel.sensors.push({ branchName: this.data[i].branchName, status: this.data[i].status, values: this.data[i].values, alias: oddSensors[j].branchName, location: oddSensors[j].location, coord: oddSensors[j].coord });
                     this.panel.sensors[i].alias = oddSensors[j].alias;
                     this.panel.sensors[i].location = oddSensors[j].location;
                     this.panel.sensors[i].coord = oddSensors[j].coord;
@@ -106,7 +99,6 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
 
     link(scope, elem, attrs, ctrl) {
         const $panelContainer = elem.find('.echarts_container')[0];
-        const $panelCard = elem.find('.echarts_card')[0];
         let option = {},
             Timer,
             currentLoc = 0,
@@ -140,6 +132,7 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
                 myChart.clear();
                 echartsData = ctrl.panel.sensors;
             }
+
             eval(ctrl.panel.EchartsOption);
             myChart.setOption(option);
 
@@ -149,6 +142,7 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
         //轮播计时器
         function setTimer() {
             clearTimeout(Timer);
+
             if (ctrl.panel.sensors.length > 0) {
                 myChart.setOption({
                     series: [{
@@ -160,12 +154,20 @@ export class EchartsMapCtrl extends MetricsPanelCtrl {
                         animationEasingUpdate: 'cubicInOut'
                     }]
                 });
+
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
-                $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:'+colorArr[ctrl.sensor.status%3]+';"></i>' + ctrl.sensor.alias + '</div>';
-                for (let j = 0; j < ctrl.sensor.values.length; j++) {
-                    $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
+
+                let $panelCard = elem.find('.echarts_card')[0];
+                if($panelCard){
+                    $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:'+colorArr[ctrl.sensor.status%3]+';"></i>' + ctrl.sensor.alias + '</div>';
+
+                    for (let j = 0; j < ctrl.sensor.values.length; j++) {
+                        $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
+                    }
                 }
+
                 currentLoc = (currentLoc + 1) % ctrl.panel.sensors.length;
+
                 Timer = setTimeout(setTimer, 3600);
             }
         }

@@ -1,4 +1,4 @@
-import {PanelCtrl} from 'app/plugins/sdk';
+import { PanelCtrl } from 'app/plugins/sdk';
 import _ from 'lodash';
 import echarts from 'vendor/echarts';
 import 'vendor/dark';
@@ -29,41 +29,31 @@ export class EchartsMapCtrl extends PanelCtrl {
 
     //post请求
     updateClock() {
-        let that = this,
-            xmlhttp;
+        let that = this, xmlhttp;
+
         if (window.XMLHttpRequest) {
             xmlhttp = new XMLHttpRequest();
-        }
-        else {
+        } else {
             xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
         }
 
         xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 if (!JSON.parse(xmlhttp.responseText).success) return;
-
                 that.data = JSON.parse(xmlhttp.responseText).data;
                 that.addSensor();
             }
         }
 
-        // xmlhttp.open("POST", "http://122.115.49.71/restful/dashboard/getBranchSum", true);
         if (that.panel.url) {
             xmlhttp.open("POST", that.panel.url, true);
             xmlhttp.send("input=grafana");
         }
 
-        // setTimeout(this.updateClock, JSON.stringify(that.panel.updateInterval));
         this.$timeout(() => { this.updateClock(); }, that.panel.updateInterval);
     }
 
     addSensor() {
-        // if (this.panel.sensors.length < this.data.length) {
-        //     this.panel.sensors.push({ branchName: this.data[this.panel.sensors.length].branchName, status: this.data[this.panel.sensors.length].status, values: this.data[this.panel.sensors.length].values, alias: this.data[this.panel.sensors.length].branchName, location: '北京', coord: [116, 40] });
-        // } else {
-        //     let lastSensor = this.panel.sensors[this.panel.sensors.length - 1];
-        //     this.panel.sensors.push({ branchName: lastSensor.branchName || '', status: lastSensor.status || 0, values: lastSensor.values || [], alias: lastSensor.branchName, location: '北京', coord: [116, 40] });
-        // }
         let oddSensors = this.panel.sensors.slice(); // 保存原数据
         this.panel.sensors.length = 0; // 清空现有数据
 
@@ -102,7 +92,7 @@ export class EchartsMapCtrl extends PanelCtrl {
         let option = {},
             Timer,
             currentLoc = 0,
-            colorArr=['#3aae32','#fe8f02','#c23531'],
+            colorArr = ['#3aae32', '#fe8f02', '#c23531'],
             echartsData = [];
 
         ctrl.IS_DATA_CHANGED = true;
@@ -123,7 +113,7 @@ export class EchartsMapCtrl extends PanelCtrl {
         let myChart = echarts.init($panelContainer, 'dark');
 
         function render() {
-            if (!myChart || !ctrl.panel.sensors) {
+            if (!myChart) {
                 return;
             }
             myChart.resize();
@@ -158,8 +148,8 @@ export class EchartsMapCtrl extends PanelCtrl {
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
 
                 let $panelCard = elem.find('.echarts_card')[0];
-                if($panelCard){
-                    $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:'+colorArr[ctrl.sensor.status%3]+';"></i>' + ctrl.sensor.alias + '</div>';
+                if ($panelCard) {
+                    $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
 
                     for (let j = 0; j < ctrl.sensor.values.length; j++) {
                         $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';

@@ -15,7 +15,7 @@ export class EchartsMapCtrl extends PanelCtrl {
             valueMaps: [],
             sensors: [],
             url: '',
-            updateInterval: 3000
+            updateInterval: 10000
         };
 
         _.defaults(this.panel, panelDefaults);
@@ -135,14 +135,12 @@ export class EchartsMapCtrl extends PanelCtrl {
 
             if (ctrl.panel.sensors.length > 0) {
                 myChart.setOption({
-                    series: [{
-                        data: [{
+                    geo:{
+                        regions: [{
                             name: ctrl.panel.sensors[currentLoc].location,
                             selected: true
-                        }],
-                        animationDurationUpdate: 1000,
-                        animationEasingUpdate: 'cubicInOut'
-                    }]
+                        }]
+                    }
                 });
 
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];

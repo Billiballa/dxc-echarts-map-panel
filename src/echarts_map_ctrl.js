@@ -1,10 +1,10 @@
 import { PanelCtrl } from 'app/plugins/sdk';
 import _ from 'lodash';
-import echarts from 'vendor/echarts';
-import 'vendor/dark';
-import 'vendor/china';
+import echarts from './libs/echarts';
+import './libs/dark';
+import './libs/china';
+import './libs/beijing';
 import './style.css!';
-
 export class EchartsMapCtrl extends PanelCtrl {
 
     constructor($scope, $injector) {
@@ -102,6 +102,8 @@ export class EchartsMapCtrl extends PanelCtrl {
         if (_.isString(height)) {
             height = parseInt(height.replace('px', ''), 10);
         }
+	    height -= 5;
+	    height -= ctrl.panel.title ? 24 : 9;
         $panelContainer.style.height = height + 'px';
 
         //init width

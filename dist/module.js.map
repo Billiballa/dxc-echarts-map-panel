@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/module.js"],"names":["EchartsMapCtrl"],"mappings":";;;;;;;;AAAQA,oB,qBAAAA,c;;;2BAGNA,c","file":"module.js","sourcesContent":["import {EchartsMapCtrl} from './echarts_map_ctrl';\r\n\r\nexport {\r\n  EchartsMapCtrl as PanelCtrl\r\n};\r\n"]}

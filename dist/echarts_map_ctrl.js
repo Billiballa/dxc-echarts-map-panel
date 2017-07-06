@@ -1,6 +1,6 @@
 'use strict';
 
-System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', './libs/china', './libs/beijing', './style.css!'], function (_export, _context) {
+System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', './libs/china', './libs/beijing', './libs/\u90B9\u57CE', './style.css!'], function (_export, _context) {
     "use strict";
 
     var PanelCtrl, _, echarts, _createClass, EchartsMapCtrl;
@@ -42,7 +42,7 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
             _ = _lodash.default;
         }, function (_libsEcharts) {
             echarts = _libsEcharts.default;
-        }, function (_libsDark) {}, function (_libsChina) {}, function (_libsBeijing) {}, function (_styleCss) {}],
+        }, function (_libsDark) {}, function (_libsChina) {}, function (_libsBeijing) {}, function (_libs) {}, function (_styleCss) {}],
         execute: function () {
             _createClass = function () {
                 function defineProperties(target, props) {

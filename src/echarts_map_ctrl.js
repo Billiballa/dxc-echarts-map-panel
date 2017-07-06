@@ -4,6 +4,7 @@ import echarts from './libs/echarts';
 import './libs/dark';
 import './libs/china';
 import './libs/beijing';
+import './libs/邹城';
 import './style.css!';
 export class EchartsMapCtrl extends PanelCtrl {
 

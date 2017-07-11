@@ -1,10 +1,7 @@
 import { PanelCtrl } from 'app/plugins/sdk';
 import _ from 'lodash';
-import echarts from './libs/echarts';
+import echarts from './libs/echarts.min';
 import './libs/dark';
-import './libs/china';
-import './libs/beijing';
-import './libs/邹城';
 import './style.css!';
 export class EchartsMapCtrl extends PanelCtrl {
 
@@ -13,23 +10,27 @@ export class EchartsMapCtrl extends PanelCtrl {
 
         const panelDefaults = {
             EchartsOption: 'option = {}',
-            valueMaps: [],
             sensors: [],
+            IS_MAP: false,
+            map: '',
+            USE_URL: false,
             url: '',
+            request: '',
             updateInterval: 10000
         };
 
-        _.defaults(this.panel, panelDefaults);
-        _.defaults(this.panel.EchartsOption, panelDefaults.EchartsOption);
+        this.maps = ['世界', '中国', '北京'];
+
+        _.defaultsDeep(this.panel, panelDefaults);
 
         this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
         this.events.on('panel-initialized', this.render.bind(this));
 
-        this.updateClock();
+        this.updateData();
     }
 
     //post请求
-    updateClock() {
+    updateData() {
         let that = this, xmlhttp;
 
         if (window.XMLHttpRequest) {
@@ -44,14 +45,14 @@ export class EchartsMapCtrl extends PanelCtrl {
                 that.data = JSON.parse(xmlhttp.responseText).data;
                 that.addSensor();
             }
-        }
+        };
 
         if (that.panel.url) {
             xmlhttp.open("POST", that.panel.url, true);
             xmlhttp.send("input=grafana");
         }
 
-        this.$timeout(() => { this.updateClock(); }, that.panel.updateInterval);
+        this.$timeout(() => { this.updateData(); }, that.panel.updateInterval);
     }
 
     addSensor() {
@@ -70,10 +71,10 @@ export class EchartsMapCtrl extends PanelCtrl {
                 }
             }
         }
-        this.dataChanged();
+        this.onDataReceived();
     }
 
-    dataChanged() {
+    onDataReceived() {
         this.IS_DATA_CHANGED = true;
         this.render();
         this.IS_DATA_CHANGED = false;
@@ -84,41 +85,106 @@ export class EchartsMapCtrl extends PanelCtrl {
     // }
 
     onInitEditMode() {
-        this.addEditorTab('Data', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
-        this.addEditorTab('Echarts options', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
+        this.addEditorTab('数据', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
+        this.addEditorTab('Echarts配置', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
+    }
+
+    importMap() {
+        if (!this.panel.IS_MAP) return;
+        switch (this.panel.map) {
+            case '世界':
+                System.import(this.getPanelPath() + 'libs/world.js');
+                break;
+            case '中国':
+                System.import(this.getPanelPath() + 'libs/china.js');
+                break;
+            case '北京':
+                System.import(this.getPanelPath() + 'libs/beijing.js');
+                break;
+            // case '百度地图':
+            // System.import('http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js');
+            // System.import('http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170703123905');
+            // document.body.innerHTML+='<script src="http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js"><script/>';
+            // (function(){
+            //     window.BMap_loadScriptTime = (new Date()).getTime();
+            //     document.body.innerHTML += '<script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170705114645"></script>';
+            // })();
+            // break;
+            default:
+                break;
+        }
+    }
+
+    getPanelPath() {
+        // the system loader preprends publib to the url, add a .. to go back one level
+        return '../' + grafanaBootData.settings.panels[this.pluginId].baseUrl + '/';
     }
 
     link(scope, elem, attrs, ctrl) {
         const $panelContainer = elem.find('.echarts_container')[0];
         let option = {},
             Timer,
+            cardInner = '',
             currentLoc = 0,
             colorArr = ['#3aae32', '#fe8f02', '#c23531'],
             echartsData = [];
 
         ctrl.IS_DATA_CHANGED = true;
 
-        //init height
-        let height = ctrl.height || panel.height || ctrl.row.height;
-        if (_.isString(height)) {
-            height = parseInt(height.replace('px', ''), 10);
+        function setHeight() {
+            let height = ctrl.height || panel.height || ctrl.row.height;
+            if (_.isString(height)) {
+                height = parseInt(height.replace('px', ''), 10);
+            }
+            // height -= 7;
+            // height -= ctrl.panel.title ? 25 : 9;
+            $panelContainer.style.height = height + 'px';
         }
-	    height -= 5;
-	    height -= ctrl.panel.title ? 24 : 9;
-        $panelContainer.style.height = height + 'px';
 
-        //init width
-        let width = document.body.clientWidth;
-        width = (width - 5.6 * 2) * ctrl.panel.span / 12 - 5.6 * 2 - 1 * 2 - 10 * 2;
-        $panelContainer.style.width = width + 'px';
+        // function setWidth() {
+        //     let width = document.body.clientWidth;
+        //     width = (width - 5.6 * 2) * ctrl.panel.span / 12 - 5.6 * 2 - 1 * 2 - 10 * 2;
+        //     $panelContainer.style.width = width + 'px';
+        // }
 
-        //init echarts
+        setHeight();
+        // setWidth();
+
         let myChart = echarts.init($panelContainer, 'dark');
+
+        ctrl.importMap();
+
+        // bad hank
+        setTimeout(function () {
+            myChart.resize();
+        }, 1000);
+
+        // 防止重复触发事件
+        var callInterval = function callInterval() {
+            var timeout, result;
+
+            function func(callBack, interval) {
+                var context = this; // jshint ignore:line
+                var args = arguments;
+
+                if (timeout) clearInterval(timeout);
+
+                timeout = setInterval(function () {
+                    result = callBack.apply(context, args);
+                }, interval);
+
+                return result;
+            }
+
+            return func;
+        }();
 
         function render() {
             if (!myChart) {
                 return;
             }
+
+            setHeight();
             myChart.resize();
 
             if (ctrl.IS_DATA_CHANGED) {
@@ -126,7 +192,7 @@ export class EchartsMapCtrl extends PanelCtrl {
                 echartsData = ctrl.panel.sensors;
             }
 
-            eval(ctrl.panel.EchartsOption);
+            eval(ctrl.panel.EchartsOption); // jshint ignore:line
             myChart.setOption(option);
 
             setTimer();
@@ -138,7 +204,7 @@ export class EchartsMapCtrl extends PanelCtrl {
 
             if (ctrl.panel.sensors.length > 0) {
                 myChart.setOption({
-                    geo:{
+                    geo: {
                         regions: [{
                             name: ctrl.panel.sensors[currentLoc].location,
                             selected: true
@@ -148,13 +214,15 @@ export class EchartsMapCtrl extends PanelCtrl {
 
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
 
-                let $panelCard = elem.find('.echarts_card')[0];
+                let $panelCard = elem.find('.card_container')[0];
                 if ($panelCard) {
-                    $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
+                    cardInner = '<div class = "card"><div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
 
                     for (let j = 0; j < ctrl.sensor.values.length; j++) {
-                        $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
+                        cardInner += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
                     }
+
+                    $panelCard.innerHTML = cardInner + '</div>';
                 }
 
                 currentLoc = (currentLoc + 1) % ctrl.panel.sensors.length;

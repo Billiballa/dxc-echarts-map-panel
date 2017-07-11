@@ -1,5 +1,5 @@
-# grafana-echarts-panel
-Echarts panel for grafana
+# grafana-echarts-map-panel
+Echarts map panel for grafana
 ## How Use
 1. `$ npm install`
 2. `$ grunt`

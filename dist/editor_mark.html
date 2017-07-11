@@ -1,4 +1,4 @@
-<h3 class="page-heading">Data Source</h3>
+<h3 class="page-heading">数据源</h3>
 <div class="editor-row">
     <div class="section gf-form-group">
         <div class="gf-form-inline">
@@ -9,7 +9,7 @@
         </div>
         <div class="gf-form-inline">
             <div class="gf-form">
-                <label class="gf-form-label width-8">Interval</label>
+                <label class="gf-form-label width-8">间隔</label>
                 <input type="number" class="input-small gf-form-input width-5" ng-model="ctrl.panel.updateInterval" placeholder="10000" />
                 <label class="gf-form-label width-3">ms</label>
             </div>
@@ -27,35 +27,35 @@
             </div>
         </div>
         <div class="section gf-form-group">
-            <h5 class="section-heading">Info</h5>
+            <h5 class="section-heading">信息</h5>
             <div class="gf-form-inline">
                 <div class="gf-form">
-                    <label class="gf-form-label width-8">Alias</label>
-                    <input type="text" class="input-small gf-form-input width-8" ng-model="sensor.alias" ng-change="ctrl.dataChanged()"
+                    <label class="gf-form-label width-8">别名</label>
+                    <input type="text" class="input-small gf-form-input width-8" ng-model="sensor.alias" ng-change="ctrl.onDataReceived()"
                     />
                 </div>
             </div>
             <div class="gf-form-inline">
                 <div class="gf-form">
-                    <label class="gf-form-label width-8">Location</label>
-                    <input type="text" class="input-small gf-form-input width-8" ng-model="sensor.location" ng-change="ctrl.dataChanged()"
+                    <label class="gf-form-label width-8">所在地</label>
+                    <input type="text" class="input-small gf-form-input width-8" ng-model="sensor.location" ng-change="ctrl.onDataReceived()"
                     />
                 </div>
             </div>
         </div>
         <div class="section gf-form-group">
-            <h5 class="section-heading">Position</h5>
+            <h5 class="section-heading">位置</h5>
             <div class="gf-form-inline">
                 <div class="gf-form">
-                    <label class="gf-form-label width-8">X axis</label>
-                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[0]" ng-change="ctrl.dataChanged()"
+                    <label class="gf-form-label width-8">X轴坐标</label>
+                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[0]" ng-change="ctrl.onDataReceived()"
                     />
                 </div>
             </div>
             <div class="gf-form-inline">
                 <div class="gf-form">
-                    <label class="gf-form-label width-8">Y axis</label>
-                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[1]" ng-change="ctrl.dataChanged()"
+                    <label class="gf-form-label width-8">Y轴坐标</label>
+                    <input type="number" class="input-small gf-form-input width-8" ng-model="sensor.coord[1]" ng-change="ctrl.onDataReceived()"
                     />
                 </div>
             </div>
@@ -64,6 +64,6 @@
 </div>
 <!--<div class="editor-row">
     <div class="gf-form-button">
-        <button class="btn btn-inverse" ng-click="ctrl.addSensor();ctrl.dataChanged()"><i class="fa fa-plus"></i>&nbsp;Add Sensor</button>
+        <button class="btn btn-inverse" ng-click="ctrl.addSensor();ctrl.onDataReceived()"><i class="fa fa-plus"></i>&nbsp;Add Sensor</button>
     </div>
 </div>-->

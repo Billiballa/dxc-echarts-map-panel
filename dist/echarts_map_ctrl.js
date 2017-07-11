@@ -1,6 +1,6 @@
 'use strict';
 
-System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', './libs/china', './libs/beijing', './libs/\u90B9\u57CE', './style.css!'], function (_export, _context) {
+System.register(['app/plugins/sdk', 'lodash', './libs/echarts.min', './libs/dark', './style.css!'], function (_export, _context) {
     "use strict";
 
     var PanelCtrl, _, echarts, _createClass, EchartsMapCtrl;
@@ -40,9 +40,9 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
             PanelCtrl = _appPluginsSdk.PanelCtrl;
         }, function (_lodash) {
             _ = _lodash.default;
-        }, function (_libsEcharts) {
-            echarts = _libsEcharts.default;
-        }, function (_libsDark) {}, function (_libsChina) {}, function (_libsBeijing) {}, function (_libs) {}, function (_styleCss) {}],
+        }, function (_libsEchartsMin) {
+            echarts = _libsEchartsMin.default;
+        }, function (_libsDark) {}, function (_styleCss) {}],
         execute: function () {
             _createClass = function () {
                 function defineProperties(target, props) {
@@ -72,19 +72,23 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
 
                     var panelDefaults = {
                         EchartsOption: 'option = {}',
-                        valueMaps: [],
                         sensors: [],
+                        IS_MAP: false,
+                        map: '',
+                        USE_URL: false,
                         url: '',
+                        request: '',
                         updateInterval: 10000
                     };
 
-                    _.defaults(_this.panel, panelDefaults);
-                    _.defaults(_this.panel.EchartsOption, panelDefaults.EchartsOption);
+                    _this.maps = ['世界', '中国', '北京'];
+
+                    _.defaultsDeep(_this.panel, panelDefaults);
 
                     _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
                     _this.events.on('panel-initialized', _this.render.bind(_this));
 
-                    _this.updateClock();
+                    _this.updateData();
                     return _this;
                 }
 
@@ -92,8 +96,8 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
 
 
                 _createClass(EchartsMapCtrl, [{
-                    key: 'updateClock',
-                    value: function updateClock() {
+                    key: 'updateData',
+                    value: function updateData() {
                         var _this2 = this;
 
                         var that = this,
@@ -119,7 +123,7 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
                         }
 
                         this.$timeout(function () {
-                            _this2.updateClock();
+                            _this2.updateData();
                         }, that.panel.updateInterval);
                     }
                 }, {
@@ -140,11 +144,11 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
                                 }
                             }
                         }
-                        this.dataChanged();
+                        this.onDataReceived();
                     }
                 }, {
-                    key: 'dataChanged',
-                    value: function dataChanged() {
+                    key: 'onDataReceived',
+                    value: function onDataReceived() {
                         this.IS_DATA_CHANGED = true;
                         this.render();
                         this.IS_DATA_CHANGED = false;
@@ -152,8 +156,41 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
                 }, {
                     key: 'onInitEditMode',
                     value: function onInitEditMode() {
-                        this.addEditorTab('Data', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
-                        this.addEditorTab('Echarts options', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
+                        this.addEditorTab('数据', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
+                        this.addEditorTab('Echarts配置', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
+                    }
+                }, {
+                    key: 'importMap',
+                    value: function importMap() {
+                        if (!this.panel.IS_MAP) return;
+                        switch (this.panel.map) {
+                            case '世界':
+                                System.import(this.getPanelPath() + 'libs/world.js');
+                                break;
+                            case '中国':
+                                System.import(this.getPanelPath() + 'libs/china.js');
+                                break;
+                            case '北京':
+                                System.import(this.getPanelPath() + 'libs/beijing.js');
+                                break;
+                            // case '百度地图':
+                            // System.import('http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js');
+                            // System.import('http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170703123905');
+                            // document.body.innerHTML+='<script src="http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js"><script/>';
+                            // (function(){
+                            //     window.BMap_loadScriptTime = (new Date()).getTime();
+                            //     document.body.innerHTML += '<script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170705114645"></script>';
+                            // })();
+                            // break;
+                            default:
+                                break;
+                        }
+                    }
+                }, {
+                    key: 'getPanelPath',
+                    value: function getPanelPath() {
+                        // the system loader preprends publib to the url, add a .. to go back one level
+                        return '../' + grafanaBootData.settings.panels[this.pluginId].baseUrl + '/';
                     }
                 }, {
                     key: 'link',
@@ -161,33 +198,67 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
                         var $panelContainer = elem.find('.echarts_container')[0];
                         var option = {},
                             Timer = void 0,
+                            cardInner = '',
                             currentLoc = 0,
                             colorArr = ['#3aae32', '#fe8f02', '#c23531'],
                             echartsData = [];
 
                         ctrl.IS_DATA_CHANGED = true;
 
-                        //init height
-                        var height = ctrl.height || panel.height || ctrl.row.height;
-                        if (_.isString(height)) {
-                            height = parseInt(height.replace('px', ''), 10);
+                        function setHeight() {
+                            var height = ctrl.height || panel.height || ctrl.row.height;
+                            if (_.isString(height)) {
+                                height = parseInt(height.replace('px', ''), 10);
+                            }
+                            // height -= 7;
+                            // height -= ctrl.panel.title ? 25 : 9;
+                            $panelContainer.style.height = height + 'px';
                         }
-                        height -= 5;
-                        height -= ctrl.panel.title ? 24 : 9;
-                        $panelContainer.style.height = height + 'px';
 
-                        //init width
-                        var width = document.body.clientWidth;
-                        width = (width - 5.6 * 2) * ctrl.panel.span / 12 - 5.6 * 2 - 1 * 2 - 10 * 2;
-                        $panelContainer.style.width = width + 'px';
+                        // function setWidth() {
+                        //     let width = document.body.clientWidth;
+                        //     width = (width - 5.6 * 2) * ctrl.panel.span / 12 - 5.6 * 2 - 1 * 2 - 10 * 2;
+                        //     $panelContainer.style.width = width + 'px';
+                        // }
 
-                        //init echarts
+                        setHeight();
+                        // setWidth();
+
                         var myChart = echarts.init($panelContainer, 'dark');
+
+                        ctrl.importMap();
+
+                        // bad hank
+                        setTimeout(function () {
+                            myChart.resize();
+                        }, 1000);
+
+                        // 防止重复触发事件
+                        var callInterval = function callInterval() {
+                            var timeout, result;
+
+                            function func(callBack, interval) {
+                                var context = this; // jshint ignore:line
+                                var args = arguments;
+
+                                if (timeout) clearInterval(timeout);
+
+                                timeout = setInterval(function () {
+                                    result = callBack.apply(context, args);
+                                }, interval);
+
+                                return result;
+                            }
+
+                            return func;
+                        }();
 
                         function render() {
                             if (!myChart) {
                                 return;
                             }
+
+                            setHeight();
                             myChart.resize();
 
                             if (ctrl.IS_DATA_CHANGED) {
@@ -195,7 +266,7 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
                                 echartsData = ctrl.panel.sensors;
                             }
 
-                            eval(ctrl.panel.EchartsOption);
+                            eval(ctrl.panel.EchartsOption); // jshint ignore:line
                             myChart.setOption(option);
 
                             setTimer();
@@ -217,13 +288,15 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts', './libs/dark', '
 
                                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
 
-                                var $panelCard = elem.find('.echarts_card')[0];
+                                var $panelCard = elem.find('.card_container')[0];
                                 if ($panelCard) {
-                                    $panelCard.innerHTML = '<div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
+                                    cardInner = '<div class = "card"><div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
 
                                     for (var j = 0; j < ctrl.sensor.values.length; j++) {
-                                        $panelCard.innerHTML += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
+                                        cardInner += '<div class="info">' + ' <span class="text">' + ctrl.sensor.values[j].name + '</span>' + ' <span class="value">' + ctrl.sensor.values[j].value + '</span>' + ' <span class="text">' + ctrl.sensor.values[j].unit + '</span>' + '</div>';
                                     }
+
+                                    $panelCard.innerHTML = cardInner + '</div>';
                                 }
 
                                 currentLoc = (currentLoc + 1) % ctrl.panel.sensors.length;

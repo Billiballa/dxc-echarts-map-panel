@@ -1,4 +1,4 @@
-.echarts_card{
+.card_container .card{
     position: absolute; 
     top: 50%;
     right: 3%;
@@ -16,10 +16,10 @@
     transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     background-color: rgba(50, 50, 50, 0.701961);
 }
-.echarts_card .title{
+.card_container .card .title{
     font-size: 14px;
 }
-.echarts_card .title .icon{
+.card_container .card .title .icon{
     display:inline-block;
     margin:0 6px 0 0;
     border-radius: 50% 50%;
@@ -27,15 +27,15 @@
     height: 14px;
     vertical-align: middle;
 }
-.echarts_card .info{
+.card_container .card .info{
     text-align: center;
     font-size: 16px;
     margin:20px 0;
 }
-.echarts_card .info .text{
+.card_container .card .info .text{
     vertical-align: middle;
 }
-.echarts_card .info .value{
+.card_container .card .info .value{
     font-size: 28px;
     font-weight: lighter;
     vertical-align: middle;

@@ -1,4 +1,4 @@
-.card_container .card{
+.map_card_container .card{
     position: absolute; 
     top: 50%;
     right: 3%;
@@ -16,10 +16,10 @@
     transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     background-color: rgba(50, 50, 50, 0.701961);
 }
-.card_container .card .title{
+.map_card_container .card .title{
     font-size: 14px;
 }
-.card_container .card .title .icon{
+.map_card_container .card .title .icon{
     display:inline-block;
     margin:0 6px 0 0;
     border-radius: 50% 50%;
@@ -27,16 +27,19 @@
     height: 14px;
     vertical-align: middle;
 }
-.card_container .card .info{
+.map_card_container .card .info{
     text-align: center;
     font-size: 16px;
     margin:20px 0;
 }
-.card_container .card .info .text{
+.map_card_container .card .info .text{
     vertical-align: middle;
 }
-.card_container .card .info .value{
+.map_card_container .card .info .value{
     font-size: 28px;
     font-weight: lighter;
     vertical-align: middle;
+}
+.echarts_map_container div.anchorBL {
+    display: none;
 }

@@ -3,6 +3,8 @@ import _ from 'lodash';
 import echarts from './libs/echarts.min';
 import './libs/dark';
 import './style.css!';
+import './libs/bmap.js';
+import './libs/getBmap.js';
 export class EchartsMapCtrl extends PanelCtrl {
 
     constructor($scope, $injector) {
@@ -101,15 +103,6 @@ export class EchartsMapCtrl extends PanelCtrl {
             case '北京':
                 System.import(this.getPanelPath() + 'libs/beijing.js');
                 break;
-            // case '百度地图':
-            // System.import('http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js');
-            // System.import('http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170703123905');
-            // document.body.innerHTML+='<script src="http://gallery.echartsjs.com/dep/echarts/latest/extension/bmap.min.js"><script/>';
-            // (function(){
-            //     window.BMap_loadScriptTime = (new Date()).getTime();
-            //     document.body.innerHTML += '<script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM&services=&t=20170705114645"></script>';
-            // })();
-            // break;
             default:
                 break;
         }
@@ -121,7 +114,7 @@ export class EchartsMapCtrl extends PanelCtrl {
     }
 
     link(scope, elem, attrs, ctrl) {
-        const $panelContainer = elem.find('.echarts_container')[0];
+        const $panelContainer = elem.find('.echarts_map_container')[0];
         let option = {},
             Timer,
             cardInner = '',
@@ -214,7 +207,7 @@ export class EchartsMapCtrl extends PanelCtrl {
 
                 ctrl.sensor = ctrl.panel.sensors[currentLoc];
 
-                let $panelCard = elem.find('.card_container')[0];
+                let $panelCard = elem.find('.map_card_container')[0];
                 if ($panelCard) {
                     cardInner = '<div class = "card"><div class="title"><i class="icon" style="background:' + colorArr[ctrl.sensor.status % 3] + ';"></i>' + ctrl.sensor.alias + '</div>';
 

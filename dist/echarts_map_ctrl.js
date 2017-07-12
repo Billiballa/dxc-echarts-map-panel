@@ -129,7 +129,7 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts.min', './libs/dark
                 }, {
                     key: 'onDataReceived',
                     value: function onDataReceived() {
-                        if (this.panel.USE_FAKE_DATA && this.panel.fakeData) {
+                        if (!this.panel.USE_URL && this.panel.fakeData) {
                             this.data = eval(this.panel.fakeData); // jshint ignore:line
                         }
 

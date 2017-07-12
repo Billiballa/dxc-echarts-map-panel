@@ -58,7 +58,7 @@ export class EchartsMapCtrl extends PanelCtrl {
     }
 
     onDataReceived() {
-        if (this.panel.USE_FAKE_DATA && this.panel.fakeData) {
+        if (!this.panel.USE_URL && this.panel.fakeData) {
             this.data = eval(this.panel.fakeData); // jshint ignore:line
         }
         

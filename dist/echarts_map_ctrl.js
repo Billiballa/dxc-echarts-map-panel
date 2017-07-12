@@ -72,9 +72,10 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts.min', './libs/dark
 
                     var panelDefaults = {
                         EchartsOption: 'option = {}',
-                        sensors: [],
                         IS_MAP: false,
                         map: '',
+                        sensors: [],
+                        fakeData: '',
                         USE_URL: false,
                         url: '',
                         request: '',
@@ -109,22 +110,34 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts.min', './libs/dark
                             xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
                         }
 
-                        xmlhttp.onreadystatechange = function () {
-                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                                if (!JSON.parse(xmlhttp.responseText).success) return;
-                                that.data = JSON.parse(xmlhttp.responseText).data;
-                                that.addSensor();
+                        xmlhttp.onreadystatuschange = function () {
+                            if (xmlhttp.readyStatue == 4 && xmlhttp.status == 200) {
+                                that.data = JSON.parse(xmlhttp.responseText);
+                                that.onDataReceived();
                             }
                         };
 
-                        if (that.panel.url) {
+                        if (that.panel.USE_URL && that.panel.url && that.panel.request) {
                             xmlhttp.open("POST", that.panel.url, true);
-                            xmlhttp.send("input=grafana");
+                            xmlhttp.send(that.panel.request);
                         }
 
                         this.$timeout(function () {
                             _this2.updateData();
                         }, that.panel.updateInterval);
+                    }
+                }, {
+                    key: 'onDataReceived',
+                    value: function onDataReceived() {
+                        if (this.panel.USE_FAKE_DATA && this.panel.fakeData) {
+                            this.data = eval(this.panel.fakeData); // jshint ignore:line
+                        }
+
+                        this.addSensor();
+
+                        this.IS_DATA_CHANGED = true;
+                        this.render();
+                        this.IS_DATA_CHANGED = false;
                     }
                 }, {
                     key: 'addSensor',
@@ -144,20 +157,12 @@ System.register(['app/plugins/sdk', 'lodash', './libs/echarts.min', './libs/dark
                                 }
                             }
                         }
-                        this.onDataReceived();
-                    }
-                }, {
-                    key: 'onDataReceived',
-                    value: function onDataReceived() {
-                        this.IS_DATA_CHANGED = true;
-                        this.render();
-                        this.IS_DATA_CHANGED = false;
                     }
                 }, {
                     key: 'onInitEditMode',
                     value: function onInitEditMode() {
-                        this.addEditorTab('数据', 'public/plugins/grafana-echarts-map-panel/editor_mark.html', 2);
-                        this.addEditorTab('Echarts配置', 'public/plugins/grafana-echarts-map-panel/editor_option.html', 3);
+                        this.addEditorTab('数据', 'public/plugins/dxc-echarts-map-panel/editor_mark.html', 2);
+                        this.addEditorTab('Echarts配置', 'public/plugins/dxc-echarts-map-panel/editor_option.html', 3);
                     }
                 }, {
                     key: 'importMap',

@@ -1,0 +1,25 @@
+<h3 class="page-heading">Ecahrts配置项</h3>
+<div class="editor-row">
+    <h5 class="section-heading">
+        地图配置
+        <tip>选择地图后需保存刷新，并配置相应option后即可显示</tip>
+    </h5>
+    <div class="editor-row">
+        <div class="section gf-form-group">
+            <div class="gf-form-inline">
+                <gf-form-switch class="gf-form" label-class="width-8" switch-class="max-width-6" label="引入地图" checked="ctrl.panel.IS_MAP"></gf-form-switch>
+                <div class="gf-form" ng-if="ctrl.panel.IS_MAP">
+                    <label class="gf-form-label width-8">选择地图</label>
+                    <div class="gf-form-select-wrapper max-width-15">
+                        <select class="gf-form-input width-8" ng-model="ctrl.panel.map" ng-options="map for map in ctrl.maps" ng-change="ctrl.importMap()"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h5 class="section-heading">
+        Option配置
+        <tip>Option配置请搜索Echarts文档；<br/>标记点数据被保存在'echartsData'变量中供使用</tip>
+    </h5>
+    <textarea class="gf-form-input" ng-model="ctrl.panel.EchartsOption" rows="20" style="width:100%" ng-change="ctrl.onDataReceived()" ng-model-onblur></textarea>
+</div>

@@ -1,79 +1,63 @@
+/* eslint import/no-extraneous-dependencies: 0 */
+
 module.exports = (grunt) => {
-  require('load-grunt-tasks')(grunt);
+  require('load-grunt-tasks')(grunt); // eslint-disable-line
 
   grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
 
   grunt.initConfig({
-
     clean: ['dist'],
-
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc',
-        ignores: ['src/bower_components/**'],
-      },
-      src: ['Gruntfile.js', 'src/*.js'],
-    },
 
     copy: {
       src_to_dist: {
         cwd: 'src',
         expand: true,
-        src: ['**/*', '!**/*.js', '!**/*.ts', '!**/*.scss', '!img/**/*'],
-        dest: 'dist'
+        src: ['**/*.css', '**/*.html', '**/*.json', '!**/*.js', '!**/*.scss'],
+        dest: 'dist',
       },
-
-      bower_libs: {
-        cwd: 'bower_components',
-        expand: true,
-        src: [],
-        dest: 'dist/libs/'
-      },
-
       libs: {
         cwd: 'libs',
         expand: true,
-        src: ['**/*'],
-        dest: 'dist/libs/',
+        src: ['**.*'],
+        dest: 'dist/libs',
         options: {
-          process: function (content, srcpath) {
-            return content.replace(/(\'|")echarts(\'|")/g, '$1./echarts.min$2');
-          },
+          process: content => content.replace(/(\'|")echarts(\'|")/g, '$1./echarts.min$2'), // eslint-disable-line
         },
       },
-
       echarts_libs: {
         cwd: 'node_modules/echarts/dist',
         expand: true,
         src: ['echarts.min.js'],
         dest: 'dist/libs/',
       },
-
       img_to_dist: {
-        cwd: 'src',
+        cwd: 'src/images',
         expand: true,
-        src: ['img/**/*'],
-        dest: 'dist/img/'
+        flatten: true,
+        src: ['*.*'],
+        dest: 'dist/images/',
       },
-
       pluginDef: {
         expand: true,
-        src: ['plugin.json', 'README.md'],
+        src: ['README.md', 'plugin.json'],
         dest: 'dist',
-      }
+      },
     },
 
     watch: {
       rebuild_all: {
-        files: ['src/**/*', 'plugin.json', 'README.md', '!src/node_modules/**', '!src/bower_components/**'],
+        files: ['src/**/*', 'src/plugin.json', 'README.md', '!src/node_modules/**', '!src/bower_components/**'],
         tasks: ['default'],
-        options: {spawn: false}
+        options: {
+          spawn: false,
+        },
       },
     },
 
     babel: {
       options: {
+        ignore: ['libs/*'],
         sourceMap: true,
         presets: ['es2015'],
         plugins: ['transform-es2015-modules-systemjs', 'transform-es2015-for-of'],
@@ -82,24 +66,21 @@ module.exports = (grunt) => {
         files: [{
           cwd: 'src',
           expand: true,
-          src: ['*.js'],
+          src: ['**/*.js'],
           dest: 'dist',
-          ext: '.js'
-        }]
+          ext: '.js',
+        }],
       },
     },
-
   });
 
   grunt.registerTask('default', [
-    'jshint',
     'clean',
     'copy:src_to_dist',
-    'copy:bower_libs',
     'copy:libs',
     'copy:echarts_libs',
     'copy:img_to_dist',
     'copy:pluginDef',
-    'babel'
+    'babel',
   ]);
 };

@@ -1,8 +1,8 @@
-<h3 class="page-heading">Ecahrts配置</h3>
+<h3 class="page-heading">Ecahrts配置项</h3>
 <div class="editor-row">
     <h5 class="section-heading">
-        图表配置项
-        <!--<tip>数据被保存在'echartsData'变量中，可直接使用。</tip>-->
+        地图配置
+        <tip>选择地图后需保存刷新，并配置相应option后即可显示</tip>
     </h5>
     <div class="editor-row">
         <div class="section gf-form-group">
@@ -17,5 +17,9 @@
             </div>
         </div>
     </div>
+    <h5 class="section-heading">
+        Option配置
+        <tip>Option配置请搜索Echarts文档；<br/>标记点数据被保存在'echartsData'变量中供使用</tip>
+    </h5>
     <textarea class="gf-form-input" ng-model="ctrl.panel.EchartsOption" rows="20" style="width:100%" ng-change="ctrl.onDataReceived()" ng-model-onblur></textarea>
 </div>
